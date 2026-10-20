@@ -2,7 +2,20 @@ import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+import sys
+import subprocess
+
+# Garante que o matplotlib esteja disponível mesmo se o requirements.txt não for lido pelo servidor
+try:
+    import matplotlib.pyplot as plt
+    HAS_MATPLOTLIB = True
+except ModuleNotFoundError:
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "matplotlib", "-q"])
+        import matplotlib.pyplot as plt
+        HAS_MATPLOTLIB = True
+    except Exception:
+        HAS_MATPLOTLIB = False
 
 # ---------------------------------------------------------
 # 1. Configuração da Página e Cores (Design System)
@@ -786,33 +799,41 @@ elif st.session_state["menu_state"] == "🐍 Estatísticas em Python":
         antes_etl = [74.2, 81.5, 58.0, 69.4]
         depois_etl = [98.5, 100.0, 99.2, 99.8]
 
-        x = np.arange(len(dimensoes))
-        largura = 0.36
+        if HAS_MATPLOTLIB:
+            x = np.arange(len(dimensoes))
+            largura = 0.36
 
-        fig1, ax1 = plt.subplots(figsize=(6.2, 4.0), dpi=110)
-        b1 = ax1.bar(x - largura / 2, antes_etl, largura, label="Base Bruta (Antes)", color="#94A3B8")
-        b2 = ax1.bar(x + largura / 2, depois_etl, largura, label="Base Limpa (Pós-Python)", color="#003366")
+            fig1, ax1 = plt.subplots(figsize=(6.2, 4.0), dpi=110)
+            b1 = ax1.bar(x - largura / 2, antes_etl, largura, label="Base Bruta (Antes)", color="#94A3B8")
+            b2 = ax1.bar(x + largura / 2, depois_etl, largura, label="Base Limpa (Pós-Python)", color="#003366")
 
-        ax1.set_ylabel("Índice de Qualidade (%)")
-        ax1.set_ylim(0, 115)
-        ax1.set_xticks(x)
-        ax1.set_xticklabels(dimensoes, fontsize=9)
-        ax1.legend(frameon=True, facecolor="#F8FAFC")
-        ax1.grid(axis="y", linestyle="--", alpha=0.4)
-        ax1.spines["top"].set_visible(False)
-        ax1.spines["right"].set_visible(False)
+            ax1.set_ylabel("Índice de Qualidade (%)")
+            ax1.set_ylim(0, 115)
+            ax1.set_xticks(x)
+            ax1.set_xticklabels(dimensoes, fontsize=9)
+            ax1.legend(frameon=True, facecolor="#F8FAFC")
+            ax1.grid(axis="y", linestyle="--", alpha=0.4)
+            ax1.spines["top"].set_visible(False)
+            ax1.spines["right"].set_visible(False)
 
-        for bar in b1:
-            ax1.annotate(f"{bar.get_height():.1f}%",
-                         xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
-                         xytext=(0, 3), textcoords="offset points", ha="center", fontsize=8, color="#475569")
-        for bar in b2:
-            ax1.annotate(f"{bar.get_height():.1f}%",
-                         xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
-                         xytext=(0, 3), textcoords="offset points", ha="center", fontsize=8, fontweight="bold", color="#003366")
+            for bar in b1:
+                ax1.annotate(f"{bar.get_height():.1f}%",
+                             xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
+                             xytext=(0, 3), textcoords="offset points", ha="center", fontsize=8, color="#475569")
+            for bar in b2:
+                ax1.annotate(f"{bar.get_height():.1f}%",
+                             xy=(bar.get_x() + bar.get_width() / 2, bar.get_height()),
+                             xytext=(0, 3), textcoords="offset points", ha="center", fontsize=8, fontweight="bold", color="#003366")
 
-        plt.tight_layout()
-        st.pyplot(fig1)
+            plt.tight_layout()
+            st.pyplot(fig1)
+        else:
+            df_g1 = pd.DataFrame({
+                "Dimensão": ["Completude", "Unicidade", "Padronização", "Validade"],
+                "Base Bruta (Antes)": antes_etl,
+                "Base Limpa (Pós-Python)": depois_etl
+            }).set_index("Dimensão")
+            st.bar_chart(df_g1, color=["#94A3B8", "#003366"])
 
     with col_g2:
         st.subheader("2. Distribuição e Outliers de SLA por Segmento (Boxplot)")
@@ -827,26 +848,35 @@ elif st.session_state["menu_state"] == "🐍 Estatísticas em Python":
         ]
         labels_seg = ["Aviação\n(ANAC)", "Rodoviário\n(ANTT)", "Hospedagem\n(Hotéis)", "Agências /\nPacotes"]
 
-        fig2, ax2 = plt.subplots(figsize=(6.2, 4.0), dpi=110)
-        box = ax2.boxplot(
-            dados_sla,
-            patch_artist=True,
-            medianprops=dict(color="#F26A21", linewidth=2.2),
-            flierprops=dict(marker="o", markerfacecolor="#F26A21", markersize=5, alpha=0.7)
-        )
-        ax2.set_xticklabels(labels_seg, fontsize=9)
-        cores_box = ["#003366", "#1E40AF", "#D4AF37", "#475569"]
-        for patch, cor in zip(box["boxes"], cores_box):
-            patch.set_facecolor(cor)
-            patch.set_alpha(0.8)
+        if HAS_MATPLOTLIB:
+            fig2, ax2 = plt.subplots(figsize=(6.2, 4.0), dpi=110)
+            box = ax2.boxplot(
+                dados_sla,
+                patch_artist=True,
+                medianprops=dict(color="#F26A21", linewidth=2.2),
+                flierprops=dict(marker="o", markerfacecolor="#F26A21", markersize=5, alpha=0.7)
+            )
+            ax2.set_xticklabels(labels_seg, fontsize=9)
+            cores_box = ["#003366", "#1E40AF", "#D4AF37", "#475569"]
+            for patch, cor in zip(box["boxes"], cores_box):
+                patch.set_facecolor(cor)
+                patch.set_alpha(0.8)
 
-        ax2.set_ylabel("Tempo de Resolução (Dias)")
-        ax2.grid(axis="y", linestyle="--", alpha=0.4)
-        ax2.spines["top"].set_visible(False)
-        ax2.spines["right"].set_visible(False)
+            ax2.set_ylabel("Tempo de Resolução (Dias)")
+            ax2.grid(axis="y", linestyle="--", alpha=0.4)
+            ax2.spines["top"].set_visible(False)
+            ax2.spines["right"].set_visible(False)
 
-        plt.tight_layout()
-        st.pyplot(fig2)
+            plt.tight_layout()
+            st.pyplot(fig2)
+        else:
+            df_g2 = pd.DataFrame({
+                "Segmento": ["Aviação (ANAC)", "Rodoviário (ANTT)", "Hospedagem (Hotéis)", "Agências / Pacotes"],
+                "Q1 (25%)": [np.percentile(d, 25) for d in dados_sla],
+                "Mediana (50%)": [np.median(d) for d in dados_sla],
+                "Q3 (75%)": [np.percentile(d, 75) for d in dados_sla]
+            }).set_index("Segmento")
+            st.bar_chart(df_g2, color=["#94A3B8", "#F26A21", "#003366"])
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -860,24 +890,28 @@ elif st.session_state["menu_state"] == "🐍 Estatísticas em Python":
         meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"]
         erros_detectados = [120, 105, 85, 60, 30, 12]
 
-        fig3, ax3 = plt.subplots(figsize=(6.2, 3.8), dpi=110)
-        ax3.plot(meses, erros_detectados, marker="o", color="#003366", linewidth=2.8, markersize=7,
-                 markerfacecolor="#F26A21", markeredgecolor="#003366", label="Registros em Quarentena")
-        ax3.fill_between(meses, erros_detectados, color="#003366", alpha=0.10)
+        if HAS_MATPLOTLIB:
+            fig3, ax3 = plt.subplots(figsize=(6.2, 3.8), dpi=110)
+            ax3.plot(meses, erros_detectados, marker="o", color="#003366", linewidth=2.8, markersize=7,
+                     markerfacecolor="#F26A21", markeredgecolor="#003366", label="Registros em Quarentena")
+            ax3.fill_between(meses, erros_detectados, color="#003366", alpha=0.10)
 
-        for m, val in zip(meses, erros_detectados):
-            ax3.annotate(f"{val}", xy=(m, val), xytext=(0, 7), textcoords="offset points",
-                         ha="center", fontsize=8.5, fontweight="bold", color="#003366")
+            for m, val in zip(meses, erros_detectados):
+                ax3.annotate(f"{val}", xy=(m, val), xytext=(0, 7), textcoords="offset points",
+                             ha="center", fontsize=8.5, fontweight="bold", color="#003366")
 
-        ax3.set_ylim(0, 140)
-        ax3.set_ylabel("Qtd. de Registros com Falha")
-        ax3.grid(axis="y", linestyle="--", alpha=0.4)
-        ax3.spines["top"].set_visible(False)
-        ax3.spines["right"].set_visible(False)
-        ax3.legend(loc="upper right", frameon=True, facecolor="#F8FAFC")
+            ax3.set_ylim(0, 140)
+            ax3.set_ylabel("Qtd. de Registros com Falha")
+            ax3.grid(axis="y", linestyle="--", alpha=0.4)
+            ax3.spines["top"].set_visible(False)
+            ax3.spines["right"].set_visible(False)
+            ax3.legend(loc="upper right", frameon=True, facecolor="#F8FAFC")
 
-        plt.tight_layout()
-        st.pyplot(fig3)
+            plt.tight_layout()
+            st.pyplot(fig3)
+        else:
+            df_g3 = pd.DataFrame({"Mês": [f"{i+1:02d} - {m}" for i, m in enumerate(meses)], "Registros em Quarentena": erros_detectados}).set_index("Mês")
+            st.line_chart(df_g3, color="#F26A21")
 
     with col_g4:
         st.subheader("4. Matriz de Incidência: Segmento vs. Problema Canônico")
@@ -892,23 +926,27 @@ elif st.session_state["menu_state"] == "🐍 Estatísticas em Python":
             [ 65,  15,   5, 80]
         ])
 
-        fig4, ax4 = plt.subplots(figsize=(6.2, 3.8), dpi=110)
-        im = ax4.imshow(matriz_valores, cmap="YlOrBr", aspect="auto")
+        if HAS_MATPLOTLIB:
+            fig4, ax4 = plt.subplots(figsize=(6.2, 3.8), dpi=110)
+            im = ax4.imshow(matriz_valores, cmap="YlOrBr", aspect="auto")
 
-        ax4.set_xticks(np.arange(len(problemas_hm)))
-        ax4.set_yticks(np.arange(len(segmentos_hm)))
-        ax4.set_xticklabels(problemas_hm, fontsize=8.5)
-        ax4.set_yticklabels(segmentos_hm, fontsize=9)
+            ax4.set_xticks(np.arange(len(problemas_hm)))
+            ax4.set_yticks(np.arange(len(segmentos_hm)))
+            ax4.set_xticklabels(problemas_hm, fontsize=8.5)
+            ax4.set_yticklabels(segmentos_hm, fontsize=9)
 
-        for i in range(len(segmentos_hm)):
-            for j in range(len(problemas_hm)):
-                valor = matriz_valores[i, j]
-                cor_texto = "white" if valor > 130 else "#0F172A"
-                ax4.text(j, i, f"{valor}", ha="center", va="center", color=cor_texto, fontweight="bold", fontsize=9)
+            for i in range(len(segmentos_hm)):
+                for j in range(len(problemas_hm)):
+                    valor = matriz_valores[i, j]
+                    cor_texto = "white" if valor > 130 else "#0F172A"
+                    ax4.text(j, i, f"{valor}", ha="center", va="center", color=cor_texto, fontweight="bold", fontsize=9)
 
-        fig4.colorbar(im, ax=ax4, fraction=0.046, pad=0.04)
-        plt.tight_layout()
-        st.pyplot(fig4)
+            fig4.colorbar(im, ax=ax4, fraction=0.046, pad=0.04)
+            plt.tight_layout()
+            st.pyplot(fig4)
+        else:
+            df_hm = pd.DataFrame(matriz_valores, index=segmentos_hm, columns=problemas_hm)
+            st.dataframe(df_hm, use_container_width=True)
 
     st.markdown("---")
     st.subheader("📋 Resumo Estatístico Descritivo (`df.describe()`) — Amostra Consolidada")
