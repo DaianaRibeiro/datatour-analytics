@@ -145,7 +145,7 @@ st.markdown("""
         font-weight: 400;
     }
 
-    /* Barra de Selos Rápidos (Página Inicial) - 4 itens na mesma linha */
+   /* Barra de Selos Rápidos (Página Inicial) - 4 itens na mesma linha no Desktop e Responsivo no Mobile */
     .badge-bar {
         display: flex;
         flex-wrap: nowrap;
@@ -165,6 +165,36 @@ st.markdown("""
         border: 1px solid #E2E8F0;
         text-align: center;
         white-space: nowrap;
+    }
+
+    /* Responsividade Mobile e Tablet para os Selos (evita rolagem lateral no celular) */
+    @media (max-width: 992px) {
+        .badge-bar {
+            flex-wrap: wrap !important;
+            gap: 8px !important;
+        }
+        .badge-item {
+            flex: 1 1 calc(50% - 8px) !important;
+            white-space: normal !important;
+            font-size: 0.82rem !important;
+            padding: 0.5rem 0.75rem !important;
+        }
+    }
+    @media (max-width: 576px) {
+        .badge-bar {
+            flex-direction: column !important;
+            flex-wrap: wrap !important;
+            gap: 8px !important;
+        }
+        .badge-item {
+            flex: 1 1 100% !important;
+            width: 100% !important;
+            white-space: normal !important;
+            border-radius: 12px !important;
+            font-size: 0.85rem !important;
+            padding: 0.55rem 0.8rem !important;
+            box-sizing: border-box !important;
+        }
     }
 
     /* Caixas de Informação/Alerta com design mais clean */
