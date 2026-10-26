@@ -757,7 +757,7 @@ elif st.session_state["menu_state"] == "📊 Dashboard Agência":
     st.write("Visão Gerencial Integrada (Pipeline: Python Pandas -> MySQL Star Schema -> Power BI).")
 
     # Link convertido para o formato de incorporação (reportEmbed) a partir do ID do seu relatório
-    LINK_DO_SEU_POWER_BI = "https://app.powerbi.com/reportEmbed?reportId=62c559f6-85ef-4989-aa4c-8c7e008fc095&autoAuth=true&pageName=d93bde49e35911c10e11"
+    LINK_DO_SEU_POWER_BI = "https://edusenac-my.sharepoint.com/:u:/g/personal/daiana53742166_edu_df_senac_br/IQA8pcf2iVeWQacaHvL8_AfoAdJLfzm7iOEIjKziUuw8EOo?e=IchiRm"
 
     # Sem o parâmetro width="100%" (que gera erro no Streamlit); omitindo o width ele já ocupa 100% da largura
     components.iframe(LINK_DO_SEU_POWER_BI, height=650, scrolling=True)
