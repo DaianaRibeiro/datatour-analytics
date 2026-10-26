@@ -726,7 +726,28 @@ elif st.session_state["menu_state"] == "📊 Dashboard Agência":
     st.header("📊 Monitoramento B2B de Qualidade de Dados")
     st.write("Visão Gerencial Integrada (Pipeline: Python Pandas -> MySQL Star Schema -> Power BI).")
 
-    # Seletor de abas do Power BI para visualização imediata sem tela de login institucional
+    # Link oficial direto para a versão web do Power BI
+    LINK_DO_SEU_POWER_BI = "https://app.powerbi.com/links/R2toRWS-1I?ctid=85cccaae-eea0-478c-8062-60536e374ef5&pbi_source=linkShare"
+
+    # Banner de acesso rápido limpo e elegante
+    st.markdown(
+        f'''
+        <div style="background: linear-gradient(135deg, #003366 0%, #004080 100%); padding: 1.5rem; border-radius: 12px; color: white; margin-bottom: 1.5rem; box-shadow: 0 4px 12px rgba(0,51,102,0.15);">
+            <h3 style="margin: 0 0 0.5rem 0; color: #FFFFFF;">🚀 Painel Analítico Executivo no Power BI</h3>
+            <p style="margin: 0 0 1rem 0; font-size: 1.02rem; color: #E2E8F0;">
+                O painel gerencial consolida todas as dimensões de qualidade, SLAs e gargalos operacionais do modelo Star Schema. Clique no botão abaixo para interagir com o relatório completo em tela cheia:
+            </p>
+            <a href="{LINK_DO_SEU_POWER_BI}" target="_blank" style="background-color: #F26A21; color: white; padding: 0.65rem 1.4rem; border-radius: 8px; text-decoration: none; font-weight: 700; display: inline-block;">
+                🔗 Acessar Dashboard Completo no Power BI ➔
+            </a>
+        </div>
+        ''',
+        unsafe_allow_html=True
+    )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Seletor interativo de abas do Power BI com exibição rica de dados e métricas
     aba_pbi = st.radio(
         "Selecione a Seção do Dashboard:",
         ["Visão Geral", "Detalhe por Segmento", "Quarentena", "Gargalos Operacionais"],
@@ -735,18 +756,7 @@ elif st.session_state["menu_state"] == "📊 Dashboard Agência":
     )
 
     st.markdown("<br>", unsafe_allow_html=True)
-
-    # Exibe o iframe principal se disponível, com fallback para as abas interativas do relatório
-    LINK_DO_SEU_POWER_BI = "https://app.powerbi.com/links/R2toRWS-1I?ctid=85cccaae-eea0-478c-8062-60536e374ef5&pbi_source=linkShare"
-
-    try:
-        components.iframe(LINK_DO_SEU_POWER_BI, height=620, scrolling=True)
-    except Exception:
-        pass
-
-    st.markdown("<br>", unsafe_allow_html=True)
     
-    # Exibe cards analíticos customizados conforme a aba selecionada no painel B2B
     if aba_pbi == "Visão Geral":
         col_v1, col_v2, col_v3, col_v4 = st.columns(4)
         col_v1.metric("Total Reclamações Limpas", "8.228", "Star Schema (MySQL)")
@@ -754,7 +764,8 @@ elif st.session_state["menu_state"] == "📊 Dashboard Agência":
         col_v3.metric("SLA Médio de Resposta", "5,73 dias", "Gargalo B2B")
         col_v4.metric("Linhas em Quarentena", "342 itens", "Great Expectations")
         
-        st.info("💡 **Dica da Gestão:** A visão geral consolida o volume tratado na tabela fato, destacando os principais gargalos por categoria canônica (com Overbooking e Extravio de Bagagem liderando as ocorrências).")
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.info("💡 **Dica da Gestão (Visão Geral):** A visão principal consolida o volume tratado na tabela fato, destacando os principais gargalos por categoria canônica. As ocorrências de *Overbooking* e *Extravio de Bagagem* lideram os chamados monitorados, exigindo atenção prioritária das agências parceiras.")
 
     elif aba_pbi == "Detalhe por Segmento":
         col_s1, col_s2, col_s3 = st.columns(3)
@@ -762,7 +773,8 @@ elif st.session_state["menu_state"] == "📊 Dashboard Agência":
         col_s2.metric("Transporte Rodoviário", "1.472 Ocorrências", "SLA: 6,0d | Nota: 3,47")
         col_s3.metric("Hospedagem & Agências", "2.478 Ocorrências", "SLA: 6,5d | Nota: 3,53")
         
-        st.info("💡 **Análise por Setor:** Permite auditar o comportamento da nota média do consumidor cruzada com o tempo de atendimento em cada segmento monitorado.")
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.info("💡 **Análise por Setor:** Permite auditar o comportamento da nota média do consumidor cruzada com o tempo de atendimento em cada segmento monitorado, garantindo governança sobre os parceiros.")
 
     elif aba_pbi == "Quarentena":
         col_q1, col_q2, col_q3 = st.columns(3)
@@ -770,22 +782,16 @@ elif st.session_state["menu_state"] == "📊 Dashboard Agência":
         col_q2.metric("Falha de Consistência (Datas)", "121 itens", "Abertura > Finalização")
         col_q3.metric("Falhas de UF / Abertura", "171 itens", "Domínio inválido")
         
-        st.warning("⚠️ **Governança de Dados:** A tabela quarentena_registros isola preventivamente registros corrompidos antes de impactar a base fato oficial.")
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.warning("⚠️ **Governança de Dados:** A tabela quarentena_registros isola preventivamente registros corrompidos gerados nas bases públicas antes de impactar a base fato oficial, garantindo o índice de 96% de confiabilidade.")
 
     else:
         col_g1, col_g2 = st.columns(2)
         col_g1.metric("Percentual Não Finalizado", "32%", "Chamados em aberto")
         col_g2.metric("Média de Tempo de Resposta", "5,73 dias", "SLA Consolidado")
         
-        st.info("📈 **Gargalos Operacionais:** Monitoramento de chamados estagnados e tempos de resposta acima da tolerância regulatória.")
-
-    st.markdown(
-        f'<div style="text-align: right; margin-top: 1.5rem;">'
-        f'<a href="{LINK_DO_SEU_POWER_BI}" '
-        f'target="_blank" style="color: #003366; font-weight: 700; text-decoration: none; font-size: 1.05rem;">'
-        f'🔗 Abrir painel interativo no Power BI (Tela Cheia) ➔</a></div>',
-        unsafe_allow_html=True
-    )
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.info("📈 **Gargalos Operacionais:** Monitoramento ativo de chamados estagnados e tempos de resposta acima da tolerância regulatória, subsidiando planos de ação para a ouvidoria.")
 
 # ---------------------------------------------------------
 # NOVA ABA: GUIA DO TURISTA (LOVABLE EMBARCADO)
